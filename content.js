@@ -42,7 +42,19 @@ function restoreScrollPosition() {
   });
 }
 
+
 window.addEventListener("load", () => {
   restoreScrollPosition();
   setInterval(saveScrollPosition, SAVE_INTERVAL);
 });
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") {
+    saveScrollPosition();
+  }
+});
+
+window.addEventListener("beforeunload", () => {
+  saveScrollPosition();
+});
+
