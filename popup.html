@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Tab Session Saver</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 15px;
+        width: 400px;
+        background-color: #f4f4f9;
+      }
+      h3 {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+      }
+      .top-buttons {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 10px;
+      }
+      button {
+        cursor: pointer;
+        padding: 6px 12px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: bold;
+        transition: background 0.3s ease;
+      }
+      #manageSitesBtn {
+        background: #007bff;
+        color: white;
+      }
+      #manageSitesBtn:hover {
+        background: #0056b3;
+      }
+      #openHistoryBtn {
+        background: #28a745;
+        color: white;
+      }
+      #openHistoryBtn:hover {
+        background: #218838;
+      }
+      #iconsView {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 12px;
+        padding: 10px;
+        background: white;
+        border-radius: 6px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      .icon-item {
+        width: 50px;
+        height: 50px;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+      }
+      .icon-item:hover {
+        transform: scale(1.1);
+      }
+      .icon-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 4px;
+      }
+      #manageView {
+        display: none;
+        margin-top: 12px;
+        padding: 10px;
+        background: white;
+        border-radius: 6px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      #manageList {
+        list-style: none;
+        padding: 0;
+      }
+      #manageList li {
+        margin: 8px 0;
+        display: flex;
+     
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 10px;
+        border-radius: 4px;
+        background: #f8f9fa;
+      }
+      .domain-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      button.delete-btn {
+        cursor: pointer;
+        background: #dc3545;
+        color: white;
+        padding: 4px 8px;
+        margin:0px 20px;
+        border: none;
+        border-radius: 4px;
+        font-size: 12px;
+      }
+      button.delete-btn:hover {
+        background: #b52b37;
+      }
+      #activeHistoryContainer {
+        display: none;
+        margin-top: 12px;
+        background-color: white;
+        border-radius: 6px;
+        padding: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      ul#activeHistoryList {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      ul#activeHistoryList li {
+        margin: 6px 0;
+        padding: 8px;
+        border-radius: 4px;
+        transition: background 0.2s ease;
+      }
+      ul#activeHistoryList li:nth-child(odd) {
+        background: #f8f9fa; /* Alternate row color */
+      }
+      ul#activeHistoryList li:nth-child(even) {
+        background: #e9ecef;
+      }
+      ul#activeHistoryList li:hover {
+        background: #d1e7fd;
+      }
+      #addCurrentSiteBtn {
+        display: block;
+        width: 100%;
+        margin-top: 12px;
+        background: #ffc107;
+        color: black;
+        font-weight: bold;
+      }
+      #addCurrentSiteBtn:hover {
+        background: #e0a800;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>Tab-Session-Saver</h3>
+
+    <div class="top-buttons">
+      <button id="manageSitesBtn">Manage Sites</button>
+      <button id="openHistoryBtn">This Site</button>
+    </div>
+
+    <!-- (all domains as icons) -->
+    <div id="iconsView"></div>
+
+    <!-- Container for the active domain's pages list -->
+    <div id="activeHistoryContainer">
+      <h4>Pages for Active Site</h4>
+      <ul id="activeHistoryList">
+      </ul>
+    </div>
+
+    <!-- just domain + delete -->
+    <div id="manageView">
+      <ul id="manageList"></ul>
+    </div>
+
+    <button id="addCurrentSiteBtn">Add Current Website</button>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

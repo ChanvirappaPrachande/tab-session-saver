@@ -1,0 +1,32 @@
+{
+    "name": "Tab-Session-Saver",
+    "description": "Saves scroll positions and keeps last 20 navigations per tracked domain.",
+    "version": "1.0",
+    "manifest_version": 3,
+    "permissions": [
+      "storage",
+      "tabs",
+      "history"
+    ],
+    "host_permissions": [
+      "<all_urls>"
+    ],
+    "action": {
+      "default_popup": "popup.html"
+    },
+    "background": {
+      "service_worker": "service-worker.js"
+    },
+    "icons": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "content_scripts": [
+      {
+        "matches": ["<all_urls>"],
+        "js": ["content.js"]
+      }
+    ]
+  }
+  
