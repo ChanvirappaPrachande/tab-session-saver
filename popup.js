@@ -1,6 +1,11 @@
 /**
- * Manages the popup UI for the extension, allowing users to track,
- * manage, and navigate their saved scroll history and visited pages.
+ * popup.js
+ * 
+ * Manages the popup UI: 
+ * - Domain list (icons)
+ * - Add current site
+ * - Manage sites
+ * - Open link with ?skipPrompt=1 so we don't show the confirm on next load
  */
 
 // DOM Elements
@@ -13,20 +18,19 @@ const openHistoryBtn = document.getElementById("openHistoryBtn");
 const activeHistoryContainer = document.getElementById("activeHistoryContainer");
 const activeHistoryList = document.getElementById("activeHistoryList");
 
-// Stores the domain of the currently active tab
+// Active domain for the current tab
 let activeDomain = null;
 
-// Initialize popup when DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
   initializePopup();
 });
 
-// Toggles the domain management view
+// Toggle manage sites
 manageSitesBtn.addEventListener("click", () => {
   if (manageView.style.display === "none" || !manageView.style.display) {
     manageView.style.display = "block";
     iconsView.style.display = "none";
-    activeHistoryContainer.style.display = "none"; // Hide active site's history if open
+    activeHistoryContainer.style.display = "none";
     loadManageList();
   } else {
     manageView.style.display = "none";
@@ -34,7 +38,7 @@ manageSitesBtn.addEventListener("click", () => {
   }
 });
 
-// Displays the history of pages visited for the active domain
+// Display the history of pages for the active domain
 openHistoryBtn.addEventListener("click", () => {
   if (!activeDomain) return;
 
@@ -44,15 +48,13 @@ openHistoryBtn.addEventListener("click", () => {
 
     activeHistoryList.innerHTML = ""; // Clear old list
 
-    // Sort the routes by timestamp DESC (newest first)
+    // Sort by newest first
     routes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
-    // Populate history list with up to 20 pages
     routes.slice(0, 20).forEach((route) => {
       const li = document.createElement("li");
       const link = document.createElement("a");
 
-      // Format timestamp
       const timestamp = route.timestamp ? new Date(route.timestamp) : new Date();
       const formattedDate = timestamp.toLocaleString("en-US", {
         year: "numeric",
@@ -64,30 +66,28 @@ openHistoryBtn.addEventListener("click", () => {
         hour12: true,
       });
 
-      // Show "time : title"
-      link.href = route.url;
+      link.href = appendSkipParam(route.url); // so no prompt on next load
       link.textContent = `${formattedDate} : ${route.title}`;
-      link.target = "_blank"; // Open in a new tab
+      link.target = "_blank";
 
       li.appendChild(link);
       activeHistoryList.appendChild(li);
     });
 
-    // Show message if empty
     if (routes.length === 0) {
       const li = document.createElement("li");
       li.textContent = "No pages recorded for this site.";
       activeHistoryList.appendChild(li);
     }
 
-    // Toggle history container visibility
-    activeHistoryContainer.style.display = 
+    // Toggle
+    activeHistoryContainer.style.display =
       activeHistoryContainer.style.display === "none" ? "block" : "none";
   });
 });
 
 /**
- * Initializes the popup by retrieving the active tab's domain and setting up UI elements.
+ * Initialize popup: figure out active domain, set up UI
  */
 function initializePopup() {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -119,7 +119,7 @@ function initializePopup() {
 }
 
 /**
- * Extracts the domain from a given URL if it's an HTTP/HTTPS link.
+ * Utility: parse domain from URL if http/https
  */
 function getDomainFromUrl(urlString) {
   try {
@@ -134,7 +134,20 @@ function getDomainFromUrl(urlString) {
 }
 
 /**
- * Adds a domain to the list of tracked websites.
+ * Append ?skipPrompt=1 to the URL so the content-continue script doesn't show the confirm.
+ */
+function appendSkipParam(urlString) {
+  try {
+    const urlObj = new URL(urlString);
+    urlObj.searchParams.set("skipPrompt", "1");
+    return urlObj.toString();
+  } catch (err) {
+    return urlString; // fallback
+  }
+}
+
+/**
+ * Add domain to tracked websites
  */
 function addDomain(domain) {
   chrome.storage.local.get(["trackedWebsites"], (res) => {
@@ -151,8 +164,7 @@ function addDomain(domain) {
 }
 
 /**
- * Loads tracked websites as clickable icons in the popup.
- * Clicking an icon opens the *newest* visited page for that domain.
+ * Show all tracked domains as icons. Clicking an icon opens the newest route with skipPrompt=1.
  */
 function loadIconsView() {
   iconsView.innerHTML = "";
@@ -173,14 +185,18 @@ function loadIconsView() {
 
       iconItem.addEventListener("click", () => {
         let routes = domainRoutes[domain] || [];
-        // Sort descending so [0] is newest
+        // Sort newest first
         routes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
         if (routes.length > 0) {
           const newestRoute = routes[0];
-          chrome.tabs.create({ url: newestRoute.url });
+          // Add skipPrompt=1 so no confirm
+          const urlToOpen = appendSkipParam(newestRoute.url);
+          chrome.tabs.create({ url: urlToOpen });
         } else {
-          chrome.tabs.create({ url: `https://${domain}` });
+          // If no route known, open domain root with skipPrompt=1
+          const rootUrl = appendSkipParam(`https://${domain}`);
+          chrome.tabs.create({ url: rootUrl });
         }
       });
 
@@ -191,8 +207,7 @@ function loadIconsView() {
 }
 
 /**
- * Loads the list of tracked domains for management purposes,
- * allowing the user to remove them.
+ * Load the list of tracked domains for management (delete).
  */
 function loadManageList() {
   manageList.innerHTML = "";
@@ -208,7 +223,7 @@ function loadManageList() {
       const domainSpan = document.createElement("span");
       domainSpan.textContent = domain;
 
-      // Delete button for removing the domain
+      // Delete button
       const deleteBtn = document.createElement("button");
       deleteBtn.textContent = "Delete";
       deleteBtn.className = "delete-btn";
@@ -227,7 +242,7 @@ function loadManageList() {
 }
 
 /**
- * Removes a domain from the tracked websites list and deletes associated scroll data.
+ * Remove domain + scroll data from storage
  */
 function removeDomain(domain) {
   chrome.storage.local.get(["trackedWebsites", "domainRoutes", "scrollData"], (res) => {
@@ -239,7 +254,7 @@ function removeDomain(domain) {
     trackedWebsites = trackedWebsites.filter((d) => d !== domain);
     delete domainRoutes[domain];
 
-    // Remove scroll data for pages within this domain
+    // Remove scroll data for that domain
     for (const url in scrollData) {
       try {
         const { hostname } = new URL(url);
@@ -247,20 +262,17 @@ function removeDomain(domain) {
           delete scrollData[url];
         }
       } catch (err) {
-        // Skip invalid URLs
+        // skip
       }
     }
 
-    chrome.storage.local.set(
-      {
-        trackedWebsites,
-        domainRoutes,
-        scrollData,
-      },
-      () => {
-        loadManageList();
-        loadIconsView();
-      }
-    );
+    chrome.storage.local.set({
+      trackedWebsites,
+      domainRoutes,
+      scrollData
+    }, () => {
+      loadManageList();
+      loadIconsView();
+    });
   });
 }

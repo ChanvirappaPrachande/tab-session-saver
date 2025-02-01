@@ -57,4 +57,3 @@ document.addEventListener("visibilitychange", () => {
 window.addEventListener("beforeunload", () => {
   saveScrollPosition();
 });
-
