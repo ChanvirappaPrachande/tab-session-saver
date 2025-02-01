@@ -18,7 +18,7 @@ function getDomainFromUrl(urlString) {
  * Event: Extension installed.
  */
 chrome.runtime.onInstalled.addListener(() => {
-    console.log("Scroll Saver Extension installed.");
+    console.log("Tab Session Saver Extension started.");
   });
   
   /**
