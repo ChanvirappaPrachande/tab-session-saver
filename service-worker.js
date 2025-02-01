@@ -18,7 +18,9 @@ function getDomainFromUrl(urlString) {
  * Event: Extension installed.
  */
 chrome.runtime.onInstalled.addListener(() => {
-    console.log("Tab Session Saver Extension started.");
+
+    console.log("Tab Session Saver Working.");
+
   });
   
   /**
